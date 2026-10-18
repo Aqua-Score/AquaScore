@@ -1,6 +1,9 @@
-# Compteur de bancs (compatible Aqualin, non officiel)
+# AquaScore — compteur de bancs (compatible Aqualin, non officiel)
 
 Application web qui photographie un plateau 6×6 en fin de partie et calcule le score des bancs.
+
+Application en ligne : https://aqua-score.github.io/AquaScore/
+
 Projet non officiel, sans lien avec l'éditeur du jeu. Cahier des charges : [aqualin-compteur-score.md](aqualin-compteur-score.md).
 
 ## Structure
