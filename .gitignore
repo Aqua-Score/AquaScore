@@ -1,0 +1,10 @@
+# Photos et données d'entraînement : jamais dans le dépôt public
+img/
+training/photos/
+training/vignettes/
+training/controle/
+training/annotations/
+# Environnements
+.venv/
+node_modules/
+__pycache__/

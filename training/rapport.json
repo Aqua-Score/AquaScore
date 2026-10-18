@@ -1,0 +1,55 @@
+{
+ "validation": [
+  {
+   "mis_de_cote": [
+    "A",
+    "E"
+   ],
+   "brut": 64,
+   "hongrois": 70,
+   "n": 72,
+   "photos_ok": 1,
+   "photos": 2,
+   "erreurs": [
+    "IMG-20261018-WA0000_24.png: etoile/jaune -> crabe/jaune",
+    "IMG-20261018-WA0000_51.png: crabe/jaune -> etoile/jaune"
+   ]
+  },
+  {
+   "mis_de_cote": [
+    "B"
+   ],
+   "brut": 72,
+   "hongrois": 72,
+   "n": 72,
+   "photos_ok": 2,
+   "photos": 2,
+   "erreurs": []
+  },
+  {
+   "mis_de_cote": [
+    "C",
+    "D"
+   ],
+   "brut": 104,
+   "hongrois": 103,
+   "n": 108,
+   "photos_ok": 2,
+   "photos": 3,
+   "erreurs": [
+    "20261018_110547_02.png: crabe/rouge -> meduse/rouge",
+    "20261018_110547_10.png: meduse/rouge -> poisson/rouge",
+    "20261018_110547_23.png: crabe/violet -> hippocampe/violet",
+    "20261018_110547_31.png: hippocampe/violet -> crabe/violet",
+    "20261018_110547_53.png: poisson/rouge -> crabe/rouge"
+   ]
+  }
+ ],
+ "total": {
+  "brut": 240,
+  "hongrois": 245,
+  "n": 252,
+  "photos_ok": 5,
+  "photos": 7
+ }
+}

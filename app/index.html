@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compteur de bancs</title>
+<style>
+  :root { --bg: #0d2233; --fg: #eef6fa; --muted: #9bb3c2; --accent: #4fd1e8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 16px; }
+  main { max-width: 520px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .note { color: var(--muted); font-size: .85rem; margin: 0 0 16px; }
+  .cadre { position: relative; width: 100%; aspect-ratio: 1; background: #000; border-radius: 8px; overflow: hidden; }
+  video { width: 100%; height: 100%; object-fit: cover; }
+  .grille { position: absolute; inset: 10%; display: grid; grid-template: repeat(6, 1fr) / repeat(6, 1fr);
+            border: 2px solid var(--accent); pointer-events: none; }
+  .grille span { border: 1px solid rgba(79, 209, 232, .45); }
+  button, a.btn { display: inline-block; margin: 12px 8px 0 0; padding: 10px 16px; border: 0; border-radius: 6px;
+                  background: var(--accent); color: #062030; font: inherit; font-weight: 600; text-decoration: none; }
+  #etat { color: var(--muted); font-size: .9rem; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Compteur de bancs</h1>
+  <p class="note">Compatible Aqualin — application non officielle, sans lien avec l'éditeur.</p>
+
+  <div class="cadre">
+    <video id="video" playsinline muted></video>
+    <div class="grille" id="grille"></div>
+  </div>
+  <button id="demarrer">Ouvrir la caméra</button>
+  <a class="btn" href="debug.html">Outil d'annotation (debug)</a>
+  <p id="etat"></p>
+</main>
+<script>
+  const grille = document.getElementById('grille');
+  for (let i = 0; i < 36; i++) grille.appendChild(document.createElement('span'));
+  const etat = document.getElementById('etat');
+
+  document.getElementById('demarrer').onclick = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      etat.textContent = 'Caméra indisponible (il faut HTTPS ou localhost).';
+      return;
+    }
+    try {
+      const flux = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 } }, audio: false,
+      });
+      const video = document.getElementById('video');
+      video.srcObject = flux;
+      await video.play();
+      const r = flux.getVideoTracks()[0].getSettings();
+      etat.textContent = `Caméra OK : ${r.width}×${r.height}, ${r.facingMode || 'orientation inconnue'}.`;
+    } catch (e) {
+      etat.textContent = `Erreur caméra : ${e.name} — ${e.message}`;
+    }
+  };
+</script>
+</body>
+</html>

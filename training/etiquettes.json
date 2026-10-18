@@ -1,0 +1,62 @@
+{
+  "_doc": "Étiquettes des photos de img/ : espece/couleur, ligne 0 = haut de la photo. Plusieurs photos peuvent partager une même partie.",
+  "photos": {
+    "20261018_110222.jpg": "A",
+    "20261018_110410.jpg": "B",
+    "20261018_110423.jpg": "B",
+    "20261018_110513.jpg": "C",
+    "20261018_110530.jpg": "C",
+    "20261018_110547.jpg": "D",
+    "IMG-20261018-WA0000.jpg": "E"
+  },
+  "parties": {
+    "A": [
+      "meduse/jaune     meduse/rose       etoile/rose      tortue/rose      crabe/jaune       hippocampe/rouge",
+      "etoile/vert      poisson/jaune     etoile/rouge     meduse/bleu      hippocampe/bleu   tortue/bleu",
+      "tortue/vert      hippocampe/jaune  etoile/violet    crabe/bleu       crabe/rouge       crabe/rose",
+      "etoile/bleu      etoile/jaune      hippocampe/rose  crabe/violet     meduse/vert       crabe/vert",
+      "poisson/rose     tortue/jaune      poisson/violet   tortue/violet    meduse/violet     hippocampe/vert",
+      "poisson/vert     poisson/rouge     poisson/bleu     tortue/rouge     hippocampe/violet meduse/rouge"
+    ],
+    "B": [
+      "etoile/rose      tortue/rose       crabe/jaune      hippocampe/rouge tortue/rouge      etoile/jaune",
+      "poisson/vert     meduse/vert       crabe/rouge      meduse/violet    tortue/violet     poisson/bleu",
+      "hippocampe/jaune etoile/rouge      hippocampe/bleu  tortue/bleu      crabe/violet      tortue/vert",
+      "meduse/jaune     poisson/jaune     meduse/bleu      crabe/bleu       etoile/vert       poisson/rouge",
+      "meduse/rose      crabe/vert        etoile/bleu      hippocampe/rose  crabe/rose        hippocampe/violet",
+      "etoile/violet    hippocampe/vert   meduse/rouge     poisson/violet   tortue/jaune      poisson/rose"
+    ],
+    "C": [
+      "meduse/violet    poisson/bleu      tortue/violet    etoile/rose      tortue/rose       crabe/jaune",
+      "tortue/bleu      hippocampe/bleu   hippocampe/rouge etoile/jaune     etoile/vert       tortue/vert",
+      "crabe/bleu       meduse/bleu       crabe/violet     tortue/rouge     hippocampe/rose   poisson/rouge",
+      "crabe/rouge      etoile/rouge      hippocampe/jaune crabe/vert       etoile/bleu       poisson/rose",
+      "meduse/vert      hippocampe/vert   meduse/jaune     hippocampe/violet meduse/rose      poisson/jaune",
+      "poisson/vert     meduse/rouge      crabe/rose       etoile/violet    poisson/violet    tortue/jaune"
+    ],
+    "D": [
+      "poisson/vert     meduse/vert       crabe/rouge      crabe/bleu       tortue/bleu       meduse/violet",
+      "meduse/rouge     hippocampe/vert   etoile/rouge     meduse/bleu      hippocampe/bleu   poisson/bleu",
+      "crabe/rose       meduse/jaune      hippocampe/jaune crabe/violet     hippocampe/rouge  tortue/violet",
+      "etoile/violet    hippocampe/violet crabe/vert       tortue/rouge     etoile/jaune      etoile/rose",
+      "poisson/violet   meduse/rose       etoile/bleu      hippocampe/rose  etoile/vert       tortue/rose",
+      "tortue/jaune     poisson/jaune     poisson/rose     poisson/rouge    tortue/vert       crabe/jaune"
+    ],
+    "E": [
+      "meduse/rouge     hippocampe/violet tortue/rouge     poisson/bleu     poisson/rouge     poisson/vert",
+      "hippocampe/vert  meduse/violet     tortue/violet    poisson/violet   tortue/jaune      poisson/rose",
+      "crabe/vert       meduse/vert       crabe/violet     hippocampe/rose  etoile/jaune      etoile/bleu",
+      "crabe/rose       crabe/rouge       crabe/bleu       etoile/violet    hippocampe/jaune  tortue/vert",
+      "tortue/bleu      hippocampe/bleu   meduse/bleu      etoile/rouge     poisson/jaune     etoile/vert",
+      "hippocampe/rouge crabe/jaune       tortue/rose      etoile/rose      meduse/rose       meduse/jaune"
+    ]
+  },
+  "memes_parties": [["A", "E"], ["B"], ["C", "D"]],
+  "_doc_memes_parties": "E = A tournée de 180°, D = C tournée de 90° : même partie, gardées ensemble pour la validation.",
+  "coins": {
+    "_doc": "Coins saisis à la main (HG, HD, BD, BG, pixels de l'original) quand la détection automatique échoue.",
+    "20261018_110222.jpg": [[122, 1071], [2240, 1080], [2244, 3233], [57, 3203]],
+    "20261018_110410.jpg": [[230, 1281], [2050, 1208], [2122, 3131], [210, 3060]],
+    "20261018_110530.jpg": [[271, 959], [2085, 975], [2158, 2815], [265, 2815]]
+  }
+}
