@@ -6,10 +6,11 @@ Projet non officiel, sans lien avec l'éditeur du jeu. Cahier des charges : [aqu
 ## Structure
 
 - `app/` : la PWA publiée sur GitHub Pages
-  - `index.html` : test caméra (caméra arrière + grille en surimpression)
-  - `debug.html` : outil d'annotation (photo → 4 coins → redressement → étiquetage → score → export JSON/PNG)
+  - `index.html` : la page unique : caméra avec contour du plateau et grille en surimpression, bouton « Calculer le score », score des deux joueurs, récapitulatif des bancs et correction case par case
   - `js/score.js` : moteur de score (flood-fill orthogonal, barème n(n−1)/2)
-  - `js/homographie.js` : homographie 4 points et redressement en JS pur
+  - `js/modele.js` : reconnaissance des 36 tuiles dans le navigateur (ONNX Runtime Web)
+  - `js/hongrois.js` : affectation hongroise (chaque tuile est unique)
+  - `js/homographie.js` : homographie 4 points en JS pur (pour une future détection automatique du plateau)
   - `model/` : modèle de reconnaissance des tuiles (ONNX) produit par `training/entrainer.py`
 - `tests/` : tests unitaires JS (`npm test`, Node ≥ 22)
 - `training/` : pipeline Python (développeur uniquement)
@@ -27,7 +28,7 @@ Projet non officiel, sans lien avec l'éditeur du jeu. Cahier des charges : [aqu
 ```
 
 Pour ajouter des photos : les mettre dans `img/`, ajouter leur grille dans `training/etiquettes.json`
-(ou la saisir avec `app/debug.html`), relancer les deux commandes, et vérifier `training/controle/`.
+relancer les deux commandes, et vérifier `training/controle/`.
 
 ## En local
 

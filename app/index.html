@@ -5,20 +5,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Compteur de bancs</title>
 <style>
-  :root { --bg: #0d2233; --fg: #eef6fa; --muted: #9bb3c2; --accent: #4fd1e8; }
+  :root { --bg: #0d2233; --panel: #15324a; --fg: #eef6fa; --muted: #9bb3c2; --accent: #4fd1e8;
+          --plateau: #bfe3f0; --gagne: #5fd38d; --alerte: #ffb74d; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 16px; }
   main { max-width: 520px; margin: 0 auto; }
   h1 { font-size: 1.4rem; margin: 0 0 4px; }
-  .note { color: var(--muted); font-size: .85rem; margin: 0 0 16px; }
+  h2 { font-size: 1.05rem; margin: 20px 0 8px; }
+  .note { color: var(--muted); font-size: .85rem; margin: 0 0 14px; }
   .cadre { position: relative; width: 100%; aspect-ratio: 1; background: #000; border-radius: 8px; overflow: hidden; }
-  video { width: 100%; height: 100%; object-fit: cover; }
+  video, #figee { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #figee { display: none; }
+  /* Surimpression : contour du plateau (5 % autour des tuiles) + grille 6×6 des tuiles. */
+  .plateau { position: absolute; inset: 6%; border: 3px solid var(--plateau); border-radius: 6px;
+             box-shadow: 0 0 0 999px rgba(0, 0, 0, .35); pointer-events: none; }
   .grille { position: absolute; inset: 10%; display: grid; grid-template: repeat(6, 1fr) / repeat(6, 1fr);
             border: 2px solid var(--accent); pointer-events: none; }
-  .grille span { border: 1px solid rgba(79, 209, 232, .45); }
-  button, a.btn { display: inline-block; margin: 12px 8px 0 0; padding: 10px 16px; border: 0; border-radius: 6px;
-                  background: var(--accent); color: #062030; font: inherit; font-weight: 600; text-decoration: none; }
-  #etat { color: var(--muted); font-size: .9rem; min-height: 1.2em; }
+  .grille span { border: 1px solid rgba(79, 209, 232, .5); }
+  .boutons { display: flex; gap: 8px; margin-top: 12px; }
+  button { flex: 1; padding: 12px 14px; border: 0; border-radius: 8px; background: var(--accent); color: #062030;
+           font: inherit; font-weight: 700; cursor: pointer; }
+  button.secondaire { background: #2b5070; color: var(--fg); }
+  button:disabled { opacity: .45; cursor: default; }
+  #etat { color: var(--muted); font-size: .9rem; min-height: 1.2em; margin: 8px 0 0; }
+  #resultat[hidden] { display: none; }
+  .scores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .joueur { background: var(--panel); border-radius: 8px; padding: 12px; text-align: center; border: 2px solid transparent; }
+  .joueur.gagnant { border-color: var(--gagne); }
+  .joueur .nom { color: var(--muted); font-size: .9rem; }
+  .joueur .pts { font-size: 2.2rem; font-weight: 800; line-height: 1.2; }
+  .joueur .verdict { font-weight: 700; }
+  .joueur.gagnant .verdict { color: var(--gagne); }
+  #avertissement { background: #4a3413; color: var(--alerte); border-radius: 8px; padding: 10px 12px; font-size: .9rem; margin-top: 10px; }
+  #avertissement[hidden] { display: none; }
+  #tuiles { display: grid; grid-template: repeat(6, 1fr) / repeat(6, 1fr); gap: 3px; width: 100%; aspect-ratio: 1; }
+  .tuile { position: relative; border: 2px solid #2b5070; border-radius: 4px; padding: 0; background: #0a1a27 no-repeat;
+           background-size: 600% 600%; overflow: hidden; }
+  .tuile.douteuse { border-color: var(--alerte); }
+  .tuile.corrigee { border-color: var(--gagne); }
+  .tuile .etiquette { position: absolute; left: 0; right: 0; bottom: 0; font-size: .62rem; font-weight: 700; color: #fff;
+                      background: rgba(0, 0, 0, .55); display: flex; align-items: center; justify-content: center; gap: 3px; padding: 1px 0; }
+  .pastille { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #fff; flex: none; }
+  .legende { color: var(--muted); font-size: .8rem; margin: 6px 0 0; }
+  .recap { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .recap div { background: var(--panel); border-radius: 8px; padding: 10px 12px; font-size: .88rem; }
+  .recap h3 { font-size: .9rem; margin: 0 0 6px; }
+  .recap ul { margin: 0; padding-left: 16px; color: var(--muted); }
+  .recap .vide { color: var(--muted); }
+  dialog { background: var(--panel); color: var(--fg); border: 0; border-radius: 10px; padding: 14px; width: min(94vw, 460px); }
+  dialog::backdrop { background: rgba(0, 0, 0, .6); }
+  dialog h3 { margin: 0 0 4px; font-size: 1rem; }
+  #choix { display: grid; grid-template-columns: auto repeat(6, 1fr); gap: 4px; margin: 10px 0; font-size: .72rem; }
+  #choix .entete { color: var(--muted); align-self: center; }
+  #choix button { padding: 8px 0; color: #062030; font-size: .7rem; border-radius: 5px; }
+  #choix button.actuel { outline: 3px solid #fff; }
 </style>
 </head>
 <body>
@@ -28,35 +68,192 @@
 
   <div class="cadre">
     <video id="video" playsinline muted></video>
+    <canvas id="figee"></canvas>
+    <div class="plateau"></div>
     <div class="grille" id="grille"></div>
   </div>
-  <button id="demarrer">Ouvrir la caméra</button>
-  <a class="btn" href="debug.html">Outil d'annotation (debug)</a>
-  <p id="etat"></p>
-</main>
-<script>
-  const grille = document.getElementById('grille');
-  for (let i = 0; i < 36; i++) grille.appendChild(document.createElement('span'));
-  const etat = document.getElementById('etat');
+  <div class="boutons">
+    <button id="camera" class="secondaire">Ouvrir la caméra</button>
+    <button id="calculer" disabled>Calculer le score</button>
+  </div>
+  <p id="etat">Chargement du modèle…</p>
 
-  document.getElementById('demarrer').onclick = async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      etat.textContent = 'Caméra indisponible (il faut HTTPS ou localhost).';
-      return;
-    }
-    try {
-      const flux = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 } }, audio: false,
-      });
-      const video = document.getElementById('video');
-      video.srcObject = flux;
-      await video.play();
-      const r = flux.getVideoTracks()[0].getSettings();
-      etat.textContent = `Caméra OK : ${r.width}×${r.height}, ${r.facingMode || 'orientation inconnue'}.`;
-    } catch (e) {
-      etat.textContent = `Erreur caméra : ${e.name} — ${e.message}`;
-    }
+  <section id="resultat" hidden>
+    <h2>Score final</h2>
+    <div class="scores">
+      <div class="joueur" id="j-espece"><div class="nom">Joueur Espèces</div><div class="pts"></div><div class="verdict"></div></div>
+      <div class="joueur" id="j-couleur"><div class="nom">Joueur Couleurs</div><div class="pts"></div><div class="verdict"></div></div>
+    </div>
+    <p id="avertissement" hidden></p>
+
+    <h2>Plateau reconnu</h2>
+    <div id="tuiles"></div>
+    <p class="legende">Touche une case pour la corriger. Orange : reconnaissance incertaine. Vert : case corrigée.</p>
+
+    <h2>Récapitulatif des bancs</h2>
+    <div class="recap">
+      <div><h3>Espèces</h3><ul id="recap-espece"></ul></div>
+      <div><h3>Couleurs</h3><ul id="recap-couleur"></ul></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="correction">
+  <h3>Corriger la case</h3>
+  <p class="note" style="margin:0">Choisis la bonne tuile. Si elle est déjà ailleurs sur le plateau, les deux cases sont échangées.</p>
+  <div id="choix"></div>
+  <div class="boutons"><button class="secondaire" id="annuler">Annuler</button></div>
+</dialog>
+
+<script type="module">
+import { score, ESPECES, COULEURS } from './js/score.js';
+import { chargerModele, decouper, reconnaitre } from './js/modele.js';
+
+const NOMS = { poisson: 'Poisson', hippocampe: 'Hippocampe', etoile: 'Étoile', tortue: 'Tortue', crabe: 'Crabe', meduse: 'Méduse' };
+const COURT = { poisson: 'Poi', hippocampe: 'Hip', etoile: 'Éto', tortue: 'Tor', crabe: 'Cra', meduse: 'Méd' };
+const TEINTE = { rouge: '#e53935', jaune: '#fdd835', vert: '#43a047', bleu: '#4fd1e8', violet: '#9575cd', rose: '#f48fb1' };
+const ZONE = 0.10;          // la grille des tuiles occupe le cadre moins 10 % de chaque côté
+const SEUIL_DOUTE = 0.5;    // confiance P(espèce) × P(couleur) sous laquelle une case est signalée
+
+const $ = (id) => document.getElementById(id);
+const video = $('video'), figee = $('figee'), etat = $('etat');
+for (let i = 0; i < 36; i++) $('grille').appendChild(document.createElement('span'));
+
+let modelePret = false, cameraPrete = false, grille = null, apercu = null, caseEnCours = null;
+const majBoutons = () => { $('calculer').disabled = !(modelePret && cameraPrete); };
+
+chargerModele()
+  .then(() => { modelePret = true; etat.textContent = 'Modèle prêt. Ouvre la caméra et cadre les tuiles dans la grille.'; majBoutons(); })
+  .catch((e) => { etat.textContent = `Impossible de charger le modèle : ${e.message}`; });
+
+// ---------- Caméra ----------
+$('camera').onclick = async () => {
+  if (!navigator.mediaDevices?.getUserMedia) { etat.textContent = 'Caméra indisponible (il faut HTTPS).'; return; }
+  try {
+    video.srcObject?.getTracks().forEach((t) => t.stop());
+    const flux = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1920 } }, audio: false,
+    });
+    video.srcObject = flux;
+    await video.play();
+    figee.style.display = 'none';
+    cameraPrete = true;
+    $('camera').textContent = 'Reprendre une photo';
+    etat.textContent = 'Aligne le bord du plateau sur le cadre clair et les tuiles sur la grille, puis calcule.';
+    majBoutons();
+  } catch (e) {
+    etat.textContent = `Erreur caméra : ${e.name} — ${e.message}`;
+  }
+};
+
+// Zone de la grille (en pixels de la vidéo), en tenant compte du recadrage « object-fit: cover ».
+function zoneVideo() {
+  const vw = video.videoWidth, vh = video.videoHeight, cote = Math.min(vw, vh);
+  return { x: (vw - cote) / 2 + ZONE * cote, y: (vh - cote) / 2 + ZONE * cote, cote: cote * (1 - 2 * ZONE) };
+}
+
+// ---------- Calcul ----------
+$('calculer').onclick = async () => {
+  $('calculer').disabled = true;
+  etat.textContent = 'Analyse en cours…';
+  try {
+    // Fige l'image affichée, puis travaille sur cette copie.
+    figee.width = video.videoWidth; figee.height = video.videoHeight;
+    figee.getContext('2d').drawImage(video, 0, 0);
+    figee.style.display = 'block';
+    const z = zoneVideo();
+    const vue = document.createElement('canvas');
+    vue.width = vue.height = 600;
+    vue.getContext('2d').drawImage(figee, z.x, z.y, z.cote, z.cote, 0, 0, 600, 600);
+    apercu = vue.toDataURL('image/jpeg', 0.85);
+    const t0 = performance.now();
+    grille = await reconnaitre(decouper(figee, z.x, z.y, z.cote));
+    grille.forEach((l) => l.forEach((t) => { t.corrigee = false; }));
+    etat.textContent = `Analyse terminée en ${Math.round(performance.now() - t0)} ms.`;
+    afficher();
+    $('resultat').hidden = false;
+    $('resultat').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    etat.textContent = `Erreur pendant l'analyse : ${e.message}`;
+  } finally {
+    majBoutons();
+  }
+};
+
+// ---------- Affichage ----------
+function afficher() {
+  const s = score(grille);
+  const camps = [['j-espece', s.especes, 'especes'], ['j-couleur', s.couleurs, 'couleurs']];
+  for (const [id, pts, camp] of camps) {
+    const el = $(id);
+    el.querySelector('.pts').textContent = `${pts} pts`;
+    el.querySelector('.verdict').textContent = s.resultat === 'egalite' ? 'Égalité' : s.resultat === camp ? 'Gagnant' : 'Perdant';
+    el.classList.toggle('gagnant', s.resultat === camp);
+  }
+
+  const douteuses = grille.flat().filter((t) => !t.corrigee && t.confiance < SEUIL_DOUTE).length;
+  $('avertissement').hidden = douteuses === 0;
+  $('avertissement').textContent = douteuses >= 6
+    ? `${douteuses} cases sont incertaines : la photo est peut-être mal cadrée. Reprends-la ou vérifie les cases en orange.`
+    : `${douteuses} case${douteuses > 1 ? 's' : ''} incertaine${douteuses > 1 ? 's' : ''} (en orange) : vérifie-la${douteuses > 1 ? 's' : ''}.`;
+
+  const tuiles = $('tuiles');
+  tuiles.innerHTML = '';
+  grille.forEach((ligne, r) => ligne.forEach((t, c) => {
+    const b = document.createElement('button');
+    b.className = 'tuile' + (t.corrigee ? ' corrigee' : t.confiance < SEUIL_DOUTE ? ' douteuse' : '');
+    b.style.backgroundImage = `url(${apercu})`;
+    b.style.backgroundPosition = `${c * 20}% ${r * 20}%`;
+    b.title = `${NOMS[t.espece]} ${t.couleur}`;
+    b.innerHTML = `<span class="etiquette"><span class="pastille" style="background:${TEINTE[t.couleur]}"></span>${COURT[t.espece]}</span>`;
+    b.onclick = () => ouvrirCorrection(r, c);
+    tuiles.appendChild(b);
+  }));
+
+  const liste = (type, id, nom) => {
+    const bancs = s.bancs.filter((b) => b.type === type).sort((a, b) => b.points - a.points || b.taille - a.taille);
+    $(id).innerHTML = bancs.length
+      ? bancs.map((b) => `<li>${nom(b.valeur)} : ${b.taille} tuiles → ${b.points} pt${b.points > 1 ? 's' : ''}</li>`).join('')
+      : '<li class="vide">Aucun banc</li>';
   };
+  liste('espece', 'recap-espece', (v) => NOMS[v]);
+  liste('couleur', 'recap-couleur', (v) => v[0].toUpperCase() + v.slice(1));
+}
+
+// ---------- Correction case par case ----------
+function ouvrirCorrection(r, c) {
+  caseEnCours = [r, c];
+  const t = grille[r][c];
+  const choix = $('choix');
+  choix.innerHTML = '<span></span>' + COULEURS.map((co) => `<span class="entete" style="text-align:center">${co}</span>`).join('');
+  for (const es of ESPECES) {
+    choix.insertAdjacentHTML('beforeend', `<span class="entete">${NOMS[es]}</span>`);
+    for (const co of COULEURS) {
+      const b = document.createElement('button');
+      b.textContent = COURT[es];
+      b.style.background = TEINTE[co];
+      b.title = `${NOMS[es]} ${co}`;
+      if (es === t.espece && co === t.couleur) b.classList.add('actuel');
+      b.onclick = () => corriger(es, co);
+      choix.appendChild(b);
+    }
+  }
+  $('correction').showModal();
+}
+
+function corriger(espece, couleur) {
+  const [r, c] = caseEnCours;
+  const t = grille[r][c];
+  if (t.espece !== espece || t.couleur !== couleur) {
+    // Chaque tuile est unique : si la tuile choisie était ailleurs, on échange les deux cases.
+    const autre = grille.flat().find((u) => u !== t && u.espece === espece && u.couleur === couleur);
+    if (autre) { autre.espece = t.espece; autre.couleur = t.couleur; autre.corrigee = true; }
+    t.espece = espece; t.couleur = couleur; t.corrigee = true;
+    afficher();
+  }
+  $('correction').close();
+}
+$('annuler').onclick = () => $('correction').close();
 </script>
 </body>
 </html>
