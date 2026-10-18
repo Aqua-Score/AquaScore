@@ -1,5 +1,5 @@
 # Photos et données d'entraînement : jamais dans le dépôt public
-img/
+/img/
 training/photos/
 training/vignettes/
 training/controle/
