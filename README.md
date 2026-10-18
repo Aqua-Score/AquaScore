@@ -9,12 +9,13 @@ Projet non officiel, sans lien avec l'éditeur du jeu. Cahier des charges : [aqu
 ## Structure
 
 - `app/` : la PWA publiée sur GitHub Pages
-  - `index.html` : la page unique : caméra avec contour du plateau et grille en surimpression, bouton « Calculer le score », score des deux joueurs, récapitulatif des bancs et correction case par case
+  - `index.html` : la page unique : bouton Share (QR code), cadre « Prendre une photo » qui ouvre la caméra, contour du plateau et grille en surimpression, bouton « Calculer le score », score des deux joueurs, récapitulatif des bancs et correction case par case
   - `js/score.js` : moteur de score (flood-fill orthogonal, barème n(n−1)/2)
   - `js/modele.js` : reconnaissance des 36 tuiles dans le navigateur (ONNX Runtime Web)
   - `js/hongrois.js` : affectation hongroise (chaque tuile est unique)
   - `js/homographie.js` : homographie 4 points en JS pur (pour une future détection automatique du plateau)
   - `model/` : modèle de reconnaissance des tuiles (ONNX) produit par `training/entrainer.py`
+  - `img/` : fond de l'accueil (photo de partie) et QR code de partage
 - `tests/` : tests unitaires JS (`npm test`, Node ≥ 22)
 - `training/` : pipeline Python (développeur uniquement)
   - `etiquettes.json` : étiquettes des photos de `img/` (une grille par partie), coins manuels si la détection échoue

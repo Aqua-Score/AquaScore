@@ -3,19 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Compteur de bancs</title>
+<title>AquaScore</title>
 <style>
   :root { --bg: #0d2233; --panel: #15324a; --fg: #eef6fa; --muted: #9bb3c2; --accent: #4fd1e8;
           --plateau: #bfe3f0; --gagne: #5fd38d; --alerte: #ffb74d; }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); padding: 16px; }
   main { max-width: 520px; margin: 0 auto; }
-  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 4px; }
+  h1 { font-size: 1.5rem; margin: 0; }
+  #partager { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: .9rem; }
   h2 { font-size: 1.05rem; margin: 20px 0 8px; }
   .note { color: var(--muted); font-size: .85rem; margin: 0 0 14px; }
-  .cadre { position: relative; width: 100%; aspect-ratio: 1; background: #000; border-radius: 8px; overflow: hidden; }
+  .cadre { position: relative; width: 100%; aspect-ratio: 1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; }
+  .cadre.direct { cursor: default; }
   video, #figee { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   #figee { display: none; }
+  /* Accueil (caméra pas encore ouverte) : photo de partie désaturée + invitation. */
+  #fond { position: absolute; inset: 0; background: url(img/fond.jpg) center / cover; filter: saturate(.4) brightness(.7); }
+  .invite { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 10px; color: #fff; font-size: 1.3rem; font-weight: 700; text-shadow: 0 2px 8px rgba(0, 0, 0, .8); pointer-events: none; }
+  .invite svg { width: 64px; height: 64px; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .8)); }
+  #reprendre { position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%); background: rgba(0, 0, 0, .65); color: #fff;
+               font-size: .85rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; white-space: nowrap; pointer-events: none; }
+  [hidden] { display: none !important; }
   /* Surimpression : contour du plateau (5 % autour des tuiles) + grille 6×6 des tuiles. */
   .plateau { position: absolute; inset: 6%; border: 3px solid var(--plateau); border-radius: 6px;
              box-shadow: 0 0 0 999px rgba(0, 0, 0, .35); pointer-events: none; }
@@ -59,21 +70,35 @@
   #choix .entete { color: var(--muted); align-self: center; }
   #choix button { padding: 8px 0; color: #062030; font-size: .7rem; border-radius: 5px; }
   #choix button.actuel { outline: 3px solid #fff; }
+  #partage { text-align: center; width: min(90vw, 340px); }
+  #partage img { width: 100%; max-width: 260px; image-rendering: pixelated; border-radius: 6px; background: #fff; padding: 8px; margin: 10px 0 6px; }
+  #partage a { color: var(--accent); font-size: .85rem; word-break: break-all; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Compteur de bancs</h1>
+  <header>
+    <h1>AquaScore</h1>
+    <button id="partager" class="secondaire" aria-haspopup="dialog">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+      Share
+    </button>
+  </header>
   <p class="note">Compatible Aqualin — application non officielle, sans lien avec l'éditeur.</p>
 
-  <div class="cadre">
+  <div class="cadre" id="cadre" role="button" tabindex="0" aria-label="Prendre une photo">
     <video id="video" playsinline muted></video>
     <canvas id="figee"></canvas>
+    <div id="fond"></div>
     <div class="plateau"></div>
     <div class="grille" id="grille"></div>
+    <div class="invite" id="invite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="4"/></svg>
+      Prendre une photo
+    </div>
+    <div id="reprendre" hidden>Toucher pour reprendre une photo</div>
   </div>
   <div class="boutons">
-    <button id="camera" class="secondaire">Ouvrir la caméra</button>
     <button id="calculer" disabled>Calculer le score</button>
   </div>
   <p id="etat">Chargement du modèle…</p>
@@ -105,6 +130,16 @@
   <div class="boutons"><button class="secondaire" id="annuler">Annuler</button></div>
 </dialog>
 
+<dialog id="partage">
+  <h3>Partager AquaScore</h3>
+  <img src="img/qr.png" alt="QR code vers AquaScore">
+  <div><a href="https://aqua-score.github.io/AquaScore/">aqua-score.github.io/AquaScore</a></div>
+  <div class="boutons">
+    <button id="partagerLien" hidden>Envoyer le lien</button>
+    <button class="secondaire" id="fermerPartage">Fermer</button>
+  </div>
+</dialog>
+
 <script type="module">
 import { score, ESPECES, COULEURS } from './js/score.js';
 import { chargerModele, decouper, reconnaitre } from './js/modele.js';
@@ -119,32 +154,60 @@ const $ = (id) => document.getElementById(id);
 const video = $('video'), figee = $('figee'), etat = $('etat');
 for (let i = 0; i < 36; i++) $('grille').appendChild(document.createElement('span'));
 
-let modelePret = false, cameraPrete = false, grille = null, apercu = null, caseEnCours = null;
-const majBoutons = () => { $('calculer').disabled = !(modelePret && cameraPrete); };
+let modelePret = false, cameraPrete = false, fige = false, grille = null, apercu = null, caseEnCours = null;
+const majBoutons = () => { $('calculer').disabled = !(modelePret && cameraPrete && !fige); };
 
 chargerModele()
-  .then(() => { modelePret = true; etat.textContent = 'Modèle prêt. Ouvre la caméra et cadre les tuiles dans la grille.'; majBoutons(); })
+  .then(() => {
+    modelePret = true;
+    if (!cameraPrete) etat.textContent = 'Touche le cadre pour ouvrir la caméra.';
+    majBoutons();
+  })
   .catch((e) => { etat.textContent = `Impossible de charger le modèle : ${e.message}`; });
 
 // ---------- Caméra ----------
-$('camera').onclick = async () => {
+const CONSIGNE = 'Aligne le bord du plateau sur le cadre clair et les tuiles sur la grille, puis calcule.';
+
+async function ouvrirCamera() {
   if (!navigator.mediaDevices?.getUserMedia) { etat.textContent = 'Caméra indisponible (il faut HTTPS).'; return; }
   try {
-    video.srcObject?.getTracks().forEach((t) => t.stop());
     const flux = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1920 } }, audio: false,
     });
     video.srcObject = flux;
     await video.play();
-    figee.style.display = 'none';
     cameraPrete = true;
-    $('camera').textContent = 'Reprendre une photo';
-    etat.textContent = 'Aligne le bord du plateau sur le cadre clair et les tuiles sur la grille, puis calcule.';
+    $('fond').hidden = $('invite').hidden = true;
+    $('cadre').classList.add('direct');
+    etat.textContent = CONSIGNE;
     majBoutons();
   } catch (e) {
     etat.textContent = `Erreur caméra : ${e.name} — ${e.message}`;
   }
-};
+}
+
+// Toucher le cadre : ouvre la caméra la première fois, puis repasse en direct après un calcul.
+function toucherCadre() {
+  if (!cameraPrete) { ouvrirCamera(); return; }
+  if (fige) {
+    fige = false;
+    figee.style.display = 'none';
+    $('reprendre').hidden = true;
+    $('cadre').classList.add('direct');
+    etat.textContent = CONSIGNE;
+    majBoutons();
+  }
+}
+$('cadre').onclick = toucherCadre;
+$('cadre').onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toucherCadre(); } };
+
+// ---------- Partage ----------
+$('partager').onclick = () => $('partage').showModal();
+$('fermerPartage').onclick = () => $('partage').close();
+if (navigator.share) {
+  $('partagerLien').hidden = false;
+  $('partagerLien').onclick = () => navigator.share({ title: 'AquaScore', url: 'https://aqua-score.github.io/AquaScore/' }).catch(() => {});
+}
 
 // Zone de la grille (en pixels de la vidéo), en tenant compte du recadrage « object-fit: cover ».
 function zoneVideo() {
@@ -161,6 +224,9 @@ $('calculer').onclick = async () => {
     figee.width = video.videoWidth; figee.height = video.videoHeight;
     figee.getContext('2d').drawImage(video, 0, 0);
     figee.style.display = 'block';
+    fige = true;
+    $('reprendre').hidden = false;
+    $('cadre').classList.remove('direct');
     const z = zoneVideo();
     const vue = document.createElement('canvas');
     vue.width = vue.height = 600;
